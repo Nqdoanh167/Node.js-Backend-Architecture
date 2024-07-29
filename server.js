@@ -1,6 +1,9 @@
+require('dotenv').config();
+const {app:{port}}=require('./src/configs/config.mongodb');
 const app = require("./src/app");
 
-const PORT=3055
+
+const PORT=port || 3055;
 const service=app.listen(PORT, () => {
   console.log(`WSV Ecommerce is running on port ${PORT}`);
 })
