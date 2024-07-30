@@ -10,4 +10,8 @@ Bài 3. Giới thiệu về 7 điều nên làm khi triển khai Connect MongoDB
 6. Điều 6: PoolSize là gì? Và ưu điểm
 7. Điều 7: Nếu Users vượt quá số lượng PoolSize thì sao?
 
-Bài 4.
+Bài 4. Kết hợp .env & configs
+
+Bài 5. API Signup
+- lean(): trả về object javascript thuần túy
+- JWT kết hợp RSA

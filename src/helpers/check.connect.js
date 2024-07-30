@@ -11,7 +11,7 @@ const countConnect = () => {
 
 //check over load
 const checkOverload = () => {
-  setInterval(() => {
+  let intervalId=setInterval(() => {
     const numConnection = mongoose.connections.length;
     const numCores = os.cpus().length;
     const memoryUsage = process.memoryUsage().rss;
