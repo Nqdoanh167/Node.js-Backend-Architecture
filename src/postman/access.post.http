@@ -5,10 +5,10 @@
 ### signup
 POST {{url_dev}}/shop/signup
 Content-Type: application/json
-x-api-key: f894c04400192ad0e6777e940b7d5cfc5f4d129eb73e22eaa6bd03ea8f9bb9db0d43dd0804f2719e06033e4569d83b2134a935b6ec2b9539eb9e2cc20cb1d950
+x-api-key: 0044286dbbabb2b6768b9f7e09164e03835a399eab0d9abb97f1001e29d56e91750f5f2fd11c6823deca88fac514cda477e6257878e3f1471dcfab3506287c08
 
 {
   "name":"SHOP DEMO 3",
-  "email":"nqdcntt6@gmail.com",
+  "email":"nqdcntt5@gmail.com",
   "password":"123456"
 }

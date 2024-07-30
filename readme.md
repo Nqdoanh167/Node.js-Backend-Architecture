@@ -15,3 +15,6 @@ Bài 4. Kết hợp .env & configs
 Bài 5. API Signup
 - lean(): trả về object javascript thuần túy
 - JWT kết hợp RSA
+
+Bài 9.
+- Phương thức tĩnh không có quyền truy cập trực tiếp đến các thuộc tính hoặc phương thức không tĩnh của lớp.
