@@ -36,14 +36,16 @@ class AccessService {
     );
     await KeyTokenService.createKeyToken({
       userId: shop._id,
-      privateKey,
       publicKey,
       refreshToken: tokens.refreshToken,
     });
-
     return tokens;
   }
 
+  static async logout(keyStore){
+    const delKey= await KeyTokenService.removeKeyById(keyStore._id)
+    return delKey
+  }
   static async login ({ email, password, refreshToken = null }) {
     // 1
     const foundShop = await findByEmail({ email });
