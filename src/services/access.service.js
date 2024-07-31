@@ -36,53 +36,41 @@ class AccessService {
       privateKey,
       publicKey,
     );
-    
-    return {publicKey,tokens};
+
+    return { publicKey, tokens };
   }
 
-  static async handlerRefreshToken(refreshToken){
-    //kiểm tra xem token này đã được sử dụng chưa
-    const foundToken=await KeyTokenService.findByRefreshTokenUsed(refreshToken)
-    if(foundToken){
-      // decode xem may la thang nao
-      const {userId,email}=await verifyJWT(refreshToken,foundToken.publicKey)
-      console.log({userId,email})
-      // xoa tất cả các token trong keyStore
-      await KeyTokenService.deleteKeyByUserId(userId)
-      throw new ForbiddenError('Something wrong happen! Please relogin')
+  static async handlerRefreshToken({ keyStore, user, refreshToken }) {
+    const { userId, email } = user;
 
+    if (keyStore.refreshTokensUsed && keyStore.refreshTokensUsed.includes(refreshToken)) {
+      await KeyTokenService.deleteKeyByUserId(userId);
+      throw new ForbiddenError('Something wrong happen! Please relogin');
     }
 
-    const holderToken= await KeyTokenService.findByRefreshToken(refreshToken)
-    if(!holderToken) throw new AuthFailureError('Shop not registered')
+    if (keyStore.refreshToken !== refreshToken) {
+      throw new AuthFailureError('Shop not registered');
+    }
+    const foundShop = await ShopService.findByEmail({ email });
+    if (!foundShop) throw new AuthFailureError('Shop not registered!');
 
-    // verifyToken
-    const {userId,email}=await verifyJWT(refreshToken,holderToken.publicKey)
-    
-    const foundShop= await ShopService.findByEmail({email})
-    if(!foundShop) throw new AuthFailureError('Shop not registered!')
-
-
-    const {publicKey,tokens}= await this.generateToken(foundShop)
+    const { publicKey, tokens } = await this.generateToken(foundShop);
     await KeyTokenService.createKeyToken({
       userId: foundShop._id,
-      publicKey : publicKey,
+      publicKey: publicKey,
       refreshToken: tokens.refreshToken,
-      refreshTokensUsed: refreshToken
+      refreshTokensUsed: refreshToken,
     });
     return {
-      user:{
-        userId,email
-      },
-      tokens
-    }
-
+      user,
+      tokens,
+    };
   }
-  static async logout(keyStore){
-    const delKey= await KeyTokenService.removeKeyById(keyStore._id)
-    return delKey
+  static async logout(keyStore) {
+    const delKey = await KeyTokenService.removeKeyById(keyStore._id);
+    return delKey;
   }
-  static async login ({ email, password, refreshToken = null }) {
+  static async login({ email, password, refreshToken = null }) {
     // 1
     const foundShop = await findByEmail({ email });
     if (!foundShop) {
@@ -96,7 +84,7 @@ class AccessService {
     }
 
     // 3 generate token & create privateKey,publicKey
-    const {publicKey,tokens} = await this.generateToken(foundShop);
+    const { publicKey, tokens } = await this.generateToken(foundShop);
     await KeyTokenService.createKeyToken({
       userId: foundShop._id,
       publicKey,
@@ -110,9 +98,8 @@ class AccessService {
       }),
       tokens,
     };
-
-  };
-  static  signUp=async({ name, email, password })=> {
+  }
+  static signUp = async ({ name, email, password }) => {
     //step1: check email exists
     const holderShop = await shopModel.findOne({ email }).lean();
     if (holderShop) {
@@ -129,7 +116,7 @@ class AccessService {
     });
 
     if (newShop) {
-      const {publicKey,tokens}= await this.generateToken(newShop)
+      const { publicKey, tokens } = await this.generateToken(newShop);
       await KeyTokenService.createKeyToken({
         userId: newShop._id,
         publicKey,
@@ -143,7 +130,7 @@ class AccessService {
         tokens,
       };
     }
-    return null
-  }
+    return null;
+  };
 }
 module.exports = AccessService;

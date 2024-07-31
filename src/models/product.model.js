@@ -28,11 +28,12 @@ var productSchema = new Schema(
     product_type: {
       type: String,
       required: true,
-      enum: ['Electronics', 'Clothing', 'Furniture'],
+      enum: ['Electronic', 'Clothing', 'Furniture'],
     },
     product_shop: {
       type: Schema.Types.ObjectId,
-      ref: 'Shop'
+      ref: 'Shop',
+      required: true,
     },
     product_attributes: {
       type: Schema.Types.Mixed,
@@ -52,6 +53,11 @@ var productSchema = new Schema(
 
 const clothingSchema = new Schema(
   {
+    product_shop: {
+      type: Schema.Types.ObjectId,
+      ref: 'Shop',
+      required: true,
+    },
     brand: { type: String, require: true },
     size: String,
     material: String,
@@ -66,6 +72,11 @@ const clothingSchema = new Schema(
 
 const electronicSchema = new Schema(
   {
+    product_shop: {
+      type: Schema.Types.ObjectId,
+      ref: 'Shop',
+      required: true,
+    },
     manufacturer: { type: String, require: true },
     model: String,
     color: String,
@@ -78,8 +89,7 @@ const electronicSchema = new Schema(
 
 
 module.exports={
-  product: mongoose.model(DOCUMENT_NAME, productSchema),
-  electronic: mongoose.model('Electronics', electronicSchema),
-  clothing: mongoose.model('Clothing', clothingSchema)
-
+  ProductModel: mongoose.model(DOCUMENT_NAME, productSchema),
+  ElectronicModel: mongoose.model('Electronics', electronicSchema),
+  ClothingModel: mongoose.model('Clothing', clothingSchema)
 }
