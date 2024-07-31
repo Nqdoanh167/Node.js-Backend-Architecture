@@ -13,11 +13,11 @@ const HEADER={
 
 const createTokenPair = async (payload, privateKey, publicKey) => {
   try {
-    const accessToken = await JWT.sign(payload, privateKey, {
+    const accessToken =  JWT.sign(payload, privateKey, {
       algorithm: 'RS256',
       expiresIn: '2 days',
     });
-    const refreshToken = await JWT.sign(payload, privateKey, {
+    const refreshToken =  JWT.sign(payload, privateKey, {
       algorithm: 'RS256',
       expiresIn: '7 days',
     });
@@ -65,4 +65,8 @@ const authentication = asyncHandler(async (req, res, next) => {
   return next();
   
 });
-module.exports = { createTokenPair, authentication };
+
+const verifyJWT = async (token, keySecret) => {
+  return  JWT.verify(token, keySecret);
+};
+module.exports = { createTokenPair, authentication,verifyJWT };
