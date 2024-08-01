@@ -7,6 +7,8 @@ const {
 } = require('../models/product.model');
 const { BadRequestError, ForbiddenError } = require('../core/error.response');
 const ProductRepo = require('../models/repositories/product.repo');
+const { removeUndefinedObj,  removeNestedObjectParser, updateNestedObjectParser } = require('../utils');
+const InventoryRepo = require('../models/repositories/inventory.repo');
 
 // define Factory class to create product
 class ProductFactory {
@@ -17,12 +19,24 @@ class ProductFactory {
       throw new BadRequestError(`Invalid product type: ${type}`);
     return new ProductClass(payload).createProduct();
   }
-  static async publishProductByShop({product_shop,product_id}){
-    return await ProductRepo.publishProductByShop({product_shop,product_id})
+
+  static async updateProduct(type,product_id, payload) {
+    const ProductClass = getProductType[type];
+    console.log({payload})
+    if (!ProductClass)
+      throw new BadRequestError(`Invalid product type: ${type}`);
+    return new ProductClass(payload).updateProduct(product_id);
   }
 
-  static async unPublishProductByShop({product_shop,product_id}){
-    return await ProductRepo.unPublishProductByShop({product_shop,product_id})
+  static async publishProductByShop({ product_shop, product_id }) {
+    return await ProductRepo.publishProductByShop({ product_shop, product_id });
+  }
+
+  static async unPublishProductByShop({ product_shop, product_id }) {
+    return await ProductRepo.unPublishProductByShop({
+      product_shop,
+      product_id,
+    });
   }
 
   //query
@@ -36,10 +50,31 @@ class ProductFactory {
     return await ProductRepo.findAllPublishForShop({ query, limit, skip });
   }
 
-  static async getListSearchProducts({ keySearch} ) {
+  static async getListSearchProducts({ keySearch }) {
     return await ProductRepo.searchProductsByUser({ keySearch });
   }
-  
+
+  static async findAllProducts({
+    limit = 50,
+    sort = 'ctime',
+    page = 1,
+    filter = { isPublished: true },
+  }) {
+    return await ProductRepo.findAllProducts({
+      limit,
+      sort,
+      page,
+      filter,
+      select: ['product_name', 'product_price', 'product_description'],
+    });
+  }
+
+  static async getDetailProduct({ product_id }) {
+    return await ProductRepo.getDetailProduct({
+      product_id,
+      unSelect: ['__v'],
+    });
+  }
 }
 
 // define base product class
@@ -65,8 +100,21 @@ class Product {
   }
 
   async createProduct(product_id) {
-    return ProductModel.create({ ...this, _id: product_id });
+    const newProduct= await ProductModel.create({ ...this, _id: product_id });
+    if(newProduct){
+      await InventoryRepo.insertInventory({
+        productId: product_id,
+        shopId: this.product_shop,
+        stock: this.product_quantity
+      })
+    }
+    return newProduct
   }
+
+  async updateProduct({productId,bodyUpdate}){
+    return await ProductRepo.updateProductById({productId, bodyUpdate, model: ProductModel});
+  }
+
 }
 
 // define sub-class for different product types Clothing
@@ -82,6 +130,25 @@ class Clothing extends Product {
     if (!newProduct) throw new BadRequestError('Create new product error');
 
     return newProduct;
+  }
+
+  async updateProduct(productId) {
+    const objectParams = this;
+
+    if (objectParams.product_attributes) {
+      // update child
+      await ProductRepo.updateProductById({
+        productId,
+        bodyUpdate: updateNestedObjectParser(await ClothingModel.findById(productId), objectParams.product_attributes),
+        model: ClothingModel,
+      });
+    }
+    const updateProduct = await super.updateProduct({
+      productId,
+      bodyUpdate: updateNestedObjectParser(await ProductRepo.getDetailProduct({product_id:productId}), objectParams),
+    });
+
+    return updateProduct
   }
 }
 

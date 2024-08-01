@@ -18,3 +18,10 @@ Bài 5. API Signup
 
 Bài 9.
 - Phương thức tĩnh không có quyền truy cập trực tiếp đến các thuộc tính hoặc phương thức không tĩnh của lớp.
+
+
+Bài 16: 
+- Sử dụng $text trong mongodb search dựa vào index
+
+Bài 18: 
+- Phân biệt PUT và PATCH
