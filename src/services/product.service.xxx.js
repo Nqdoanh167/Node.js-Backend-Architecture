@@ -6,6 +6,7 @@ const {
   FurnitureModel,
 } = require('../models/product.model');
 const { BadRequestError, ForbiddenError } = require('../core/error.response');
+const ProductRepo = require('../models/repositories/product.repo');
 
 // define Factory class to create product
 class ProductFactory {
@@ -16,6 +17,29 @@ class ProductFactory {
       throw new BadRequestError(`Invalid product type: ${type}`);
     return new ProductClass(payload).createProduct();
   }
+  static async publishProductByShop({product_shop,product_id}){
+    return await ProductRepo.publishProductByShop({product_shop,product_id})
+  }
+
+  static async unPublishProductByShop({product_shop,product_id}){
+    return await ProductRepo.unPublishProductByShop({product_shop,product_id})
+  }
+
+  //query
+  static async findAllDraftsForShop({ product_shop, limit = 50, skip = 0 }) {
+    const query = { product_shop, isDraft: true };
+    return await ProductRepo.findAllDraftsForShop({ query, limit, skip });
+  }
+
+  static async findAllPublishForShop({ product_shop, limit = 50, skip = 0 }) {
+    const query = { product_shop, isPublished: true };
+    return await ProductRepo.findAllPublishForShop({ query, limit, skip });
+  }
+
+  static async getListSearchProducts({ keySearch} ) {
+    return await ProductRepo.searchProductsByUser({ keySearch });
+  }
+  
 }
 
 // define base product class
